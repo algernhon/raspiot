@@ -2,8 +2,6 @@ from .constants import *
 import math
 import time
 
-__version__ = '1.0.5'
-
 class BME680(BME680Data):
     def __init__(self, i2c_addr=I2C_ADDR_PRIMARY, temp_offset=0):
         BME680Data.__init__(self)
