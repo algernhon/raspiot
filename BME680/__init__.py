@@ -5,16 +5,11 @@ import time
 __version__ = '1.0.5'
 
 class BME680(BME680Data):
-    """BOSCH BME680
-    Gas, pressure, temperature and humidity sensor.
-    :param i2c_addr: One of I2C_ADDR_PRIMARY (0x76) or I2C_ADDR_SECONDARY (0x77)
-    :param i2c_device: Optional smbus or compatible instance for facilitating i2c communications.
-    """
-    def __init__(self, i2c_addr=I2C_ADDR_PRIMARY, i2c_device=None):
+    def __init__(self, i2c_addr=I2C_ADDR_PRIMARY, temp_offset=0):
         BME680Data.__init__(self)
 
         self.i2c_addr = i2c_addr
-        self._i2c = i2c_device
+        self._i2c = None
         if self._i2c is None:
             import smbus
             self._i2c = smbus.SMBus(1)
@@ -33,7 +28,7 @@ class BME680(BME680Data):
         self.set_temperature_oversample(OS_8X)
         self.set_filter(FILTER_SIZE_3)
         self.set_gas_status(ENABLE_GAS_MEAS)
-        self.set_temp_offset(0)
+        self.set_temp_offset(temp_offset)
         self.get_sensor_data()
 
     def _get_calibration_data(self):
