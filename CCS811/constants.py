@@ -1,3 +1,5 @@
+from micropython import const
+
 _ALG_RESULT_DATA = const(0x02)
 _RAW_DATA = const(0x03)
 _ENV_DATA = const(0x05)
