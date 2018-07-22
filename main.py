@@ -17,20 +17,11 @@ sBME680.set_pressure_oversample(BME680.OS_4X)
 sBME680.set_temperature_oversample(BME680.OS_8X)
 sBME680.set_filter(BME680.FILTER_SIZE_3)
 sBME680.set_gas_status(BME680.ENABLE_GAS_MEAS)
-
-print("\n\nInitial reading:")
-for name in dir(sBME680.data):
-    value = getattr(sBME680.data, name)
-
-    if not name.startswith('_'):
-        print("{}: {}".format(name, value))
-
 sBME680.set_gas_heater_temperature(320)
 sBME680.set_gas_heater_duration(150)
 sBME680.select_gas_heater_profile(0)
 
 # Main loop
-print("Launching main loop")
 try:
     while True:
         # BME680 loop
@@ -47,14 +38,12 @@ try:
             pass
 
         # CSS811 loop
-        try:
-	        if ccs.available():
-	            temp = ccs.calculateTemperature()
-	            if not ccs.readData():
-	                print "CO2: ", ccs.geteCO2(), "ppm, TVOC: ", ccs.getTVOC(), " temp: ", temp
 
-        except:
-            pass
+        if ccs.available():
+            temp = ccs.calculateTemperature()
+            if not ccs.readData():
+                print "CO2: ", ccs.geteCO2(), "ppm, TVOC: ", ccs.getTVOC(), " temp: ", temp
+
 
         # Wait 
         time.sleep(3)
