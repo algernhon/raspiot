@@ -11,6 +11,11 @@ import CCS811
 sBME680 = BME680.BME680(0x77, -2)
 sCCS811 = CCS811.CCS811()
 
+#IoT config 
+sBME680.set_gas_heater_temperature(320)
+sBME680.set_gas_heater_duration(150)
+sBME680.select_gas_heater_profile(0)
+
 # Main loop
 try:
     while True:
