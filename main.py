@@ -39,10 +39,9 @@ try:
 
         # CSS811 loop
 
-        if ccs.available():
-            temp = ccs.calculateTemperature()
-            if not ccs.readData():
-                print "CO2: ", ccs.geteCO2(), "ppm, TVOC: ", ccs.getTVOC(), " temp: ", temp
+        if sCCS811.available():
+            if not sCCS811.readData():
+                print "CO2: ", sCCS811.geteCO2(), "ppm, TVOC: ", sCCS811.getTVOC()
 
 
         # Wait 
