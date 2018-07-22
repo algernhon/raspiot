@@ -22,8 +22,10 @@ sBME680.set_gas_heater_duration(150)
 sBME680.select_gas_heater_profile(0)
 
 # Main loop
+echo("Launching main loop")
 try:
     while True:
+        echo("Loop")
         # BME680 loop
         try:
             if sBME680.get_sBME680_data():
