@@ -2,7 +2,7 @@
 POLL_PERIOD_MS = 10
 
 # BME680 I2C addresses
-I2C_ADDR_PRIMARY = 0x76
+I2C_ADDR_PRIMARY = 0x77
 I2C_ADDR_SECONDARY = 0x77
 
 # BME680 unique chip identifier
