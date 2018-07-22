@@ -7,8 +7,7 @@ import time
 import BME680 
 
 # Instance sensors
-sensor = BME680.BME680()
-
+sensor = BME680.BME680(0x77)
 
 # BME680 These oversampling settings can be tweaked to 
 sensor.set_humidity_oversample(BME680.OS_2X)
