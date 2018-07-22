@@ -38,11 +38,12 @@ try:
             pass
 
         # CSS811 loop
-
-        if sCCS811.available():
-            if not sCCS811.readData():
-                print "CO2: ", sCCS811.geteCO2(), "ppm, TVOC: ", sCCS811.getTVOC()
-
+        try:
+            if sCCS811.available():
+                if not sCCS811.readData():
+                    print "CO2: ", sCCS811.geteCO2(), "ppm, TVOC: ", sCCS811.getTVOC()
+        except:
+            pass
 
         # Wait 
         time.sleep(3)
