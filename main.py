@@ -36,14 +36,17 @@ try:
         print("Loop")
         
         # BME680 loop
-        if sBME680.get_sBME680_data():
-            output = "{0:.2f} C,{1:.2f} hPa,{2:.2f} %RH".format(sBME680.data.temperature, sBME680.data.pressure, sBME680.data.humidity)
+        try:
+            if sBME680.get_sensor_data():
+                output = "{0:.2f} C,{1:.2f} hPa,{2:.2f} %RH".format(sBME680.data.temperature, sBME680.data.pressure, sBME680.data.humidity)
 
-            if sBME680.data.heat_stable:
-                print("{0},{1} Ohms".format(output, sBME680.data.gas_resistance))
+                if sBME680.data.heat_stable:
+                    print("{0},{1} Ohms".format(output, sBME680.data.gas_resistance))
 
-            else:
-                print(output)
+                else:
+                    print(output)
+        except:
+            pass
 
         # CSS811 loop
         try:
