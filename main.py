@@ -40,7 +40,7 @@ try:
 
         # CSS811 loop
         try:
-            if ccs.data_ready
+            if ccs.data_ready:
                 print("CO2: ", ccs.eco2, " TVOC: ", ccs.tvoc)
 
         except:
