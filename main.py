@@ -40,7 +40,7 @@ try:
         # CSS811 loop
         try:
             if sCCS811.available():
-                if not sCCS811.readData():
+                if not sCCS811.readData() and sCCS811.geteCO2() > 0:
                     print "CO2: ", sCCS811.geteCO2(), "ppm, TVOC: ", sCCS811.getTVOC()
         except:
             pass
