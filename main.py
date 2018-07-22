@@ -36,7 +36,7 @@ try:
         print("Loop")
         
         # BME680 loop
-        try:
+        
             if sBME680.get_sBME680_data():
                 output = "{0:.2f} C,{1:.2f} hPa,{2:.2f} %RH".format(sBME680.data.temperature, sBME680.data.pressure, sBME680.data.humidity)
 
@@ -46,8 +46,7 @@ try:
                 else:
                     print(output)
         
-        except:
-            pass
+       
 
         # CSS811 loop
         try:
