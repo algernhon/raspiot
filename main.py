@@ -5,11 +5,11 @@ import time
 
 # Import sensors
 import BME680
-import CCS811
+
 
 # Instance sensors
 sBME680 = BME680.BME680(0x77, -2)
-sCCS811 = CCS811.CCS811()
+
 
 # BME680 settings
 sBME680.set_humidity_oversample(BME680.OS_2X)
@@ -37,7 +37,6 @@ try:
 
                 else:
                     print(output)
-        
         except:
             pass
 
