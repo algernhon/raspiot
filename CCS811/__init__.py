@@ -1,169 +1,168 @@
-import time
+import logging
+from Adafruit_bitfield import Adafruit_bitfield
+from time import sleep
 import math
 
 from .constants import *
 
-from adafruit_bus_device.i2c_device import I2CDevice
-from adafruit_register import i2c_bit
-from adafruit_register import i2c_bits
+class Adafruit_CCS811(object):
+	def __init__(self, mode=CCS811_DRIVE_MODE_1SEC, address=CCS811_ADDRESS, i2c=None, **kwargs):
+		self._logger = logging.getLogger('Adafruit_CCS811.CCS811')
+		# Check that mode is valid.
+		if mode not in [CCS811_DRIVE_MODE_IDLE, CCS811_DRIVE_MODE_1SEC, CCS811_DRIVE_MODE_10SEC, CCS811_DRIVE_MODE_60SEC, CCS811_DRIVE_MODE_250MS]:
+			raise ValueError('Unexpected mode value {0}.  Set mode to one of CCS811_DRIVE_MODE_IDLE, CCS811_DRIVE_MODE_1SEC, CCS811_DRIVE_MODE_10SEC, CCS811_DRIVE_MODE_60SEC or CCS811_DRIVE_MODE_250MS'.format(mode))
 
-class CCS811:
-    #set up the registers
-    error = i2c_bit.ROBit(0x00, 0)
-    """True when an error has occured."""
-    data_ready = i2c_bit.ROBit(0x00, 3)
-    """True when new data has been read."""
-    app_valid = i2c_bit.ROBit(0x00, 4)
-    fw_mode = i2c_bit.ROBit(0x00, 7)
+		# Create I2C device.
+		if i2c is None:
+			import Adafruit_GPIO.I2C as I2C
+			i2c = I2C
+		self._device = i2c.get_i2c_device(address, **kwargs)
 
-    hw_id = i2c_bits.ROBits(8, 0x20, 0)
+		#set up the registers
+		self._status = Adafruit_bitfield([('ERROR' , 1), ('unused', 2), ('DATA_READY' , 1), ('APP_VALID', 1), ('unused2' , 2), ('FW_MODE' , 1)])
+		
+		self._meas_mode = Adafruit_bitfield([('unused', 2), ('INT_THRESH', 1), ('INT_DATARDY', 1), ('DRIVE_MODE', 3)])
 
-    int_thresh = i2c_bit.RWBit(0x01, 2)
-    interrupt_enabled = i2c_bit.RWBit(0x01, 3)
-    drive_mode = i2c_bits.RWBits(3, 0x01, 4)
+		self._error_id = Adafruit_bitfield([('WRITE_REG_INVALID', 1), ('READ_REG_INVALID', 1), ('MEASMODE_INVALID', 1), ('MAX_RESISTANCE', 1), ('HEATER_FAULT', 1), ('HEATER_SUPPLY', 1)])
 
-    temp_offset = 0.0
-    """Temperature offset."""
+		self._TVOC = 0
+		self._eCO2 = 0
+		self.tempOffset = 0
 
-    def __init__(self, address=0x5A):
-        import smbus
-        i2c_bus = smbus.SMBus(1)
+			#check that the HW id is correct
+		if(self._device.readU8(CCS811_HW_ID) != CCS811_HW_ID_CODE):
+			raise Exception("Device ID returned is not correct! Please check your wiring.")
+		
+		#try to start the app
+		self._device.writeList(CCS811_BOOTLOADER_APP_START, [])
+		sleep(.1)
+		
+		#make sure there are no errors and we have entered application mode
+		if(self.checkError()):
+			raise Exception("Device returned an Error! Try removing and reapplying power to the device and running the code again.")
+		if(not self._status.FW_MODE):
+			raise Exception("Device did not enter application mode! If you got here, there may be a problem with the firmware on your sensor.")
+		
+		self.disableInterrupt()
+		
+		#default to read every second
+		self.setDriveMode(CCS811_DRIVE_MODE_1SEC)
 
-        self.i2c_device = I2CDevice(i2c_bus, address)
 
-        #check that the HW id is correct
-        if self.hw_id != _HW_ID_CODE:
-            raise RuntimeError("Device ID returned is not correct! Please check your wiring.")
+	def setDriveMode(self, mode):
 
-        #try to start the app
-        buf = bytearray(1)
-        buf[0] = 0xF4
-        with self.i2c_device as i2c:
-            i2c.write(buf, end=1, stop=True)
-        time.sleep(.1)
+		self._meas_mode.DRIVE_MODE = mode
+		self._device.write8(CCS811_MEAS_MODE, self._meas_mode.get())
 
-        #make sure there are no errors and we have entered application mode
-        if self.error:
-            raise RuntimeError("Device returned a error! Try removing and reapplying power to "
-                               "the device and running the code again.")
-        if not self.fw_mode:
-            raise RuntimeError("Device did not enter application mode! If you got here, there may "
-                               "be a problem with the firmware on your sensor.")
 
-        self.interrupt_enabled = False
+	def enableInterrupt(self):
 
-        #default to read every second
-        self.drive_mode = DRIVE_MODE_1SEC
+		self._meas_mode.INT_DATARDY = 1
+		self._device.write8(CCS811_MEAS_MODE, self._meas_mode.get())
 
-        self._eco2 = None # pylint: disable=invalid-name
-        self._tvoc = None # pylint: disable=invalid-name
 
-    @property
-    def error_code(self):
-        """Error code"""
-        buf = bytearray(2)
-        buf[0] = 0xE0
-        with self.i2c_device as i2c:
-            i2c.write(buf, end=1, stop=False)
-            i2c.readinto(buf, start=1)
-        return buf[1]
+	def disableInterrupt(self):
 
-    def _update_data(self):
-        if self.data_ready:
-            buf = bytearray(9)
-            buf[0] = _ALG_RESULT_DATA
-            with self.i2c_device as i2c:
-                i2c.write(buf, end=1, stop=False)
-                i2c.readinto(buf, start=1)
+		self._meas_mode.INT_DATARDY = 0
+		self._device.write8(CCS811_MEAS_MODE, self._meas_mode.get())
 
-            self._eco2 = (buf[1] << 8) | (buf[2])
-            self._tvoc = (buf[3] << 8) | (buf[4])
 
-            if self.error:
-                raise RuntimeError("Error:" + str(self.error_code))
+	def available(self):
 
-    @property
-    def tvoc(self): # pylint: disable=invalid-name
-        """Total Volatile Organic Compound in parts per billion."""
-        self._update_data()
-        return self._tvoc
+		self._status.set(self._device.readU8(CCS811_STATUS))
+		if(not self._status.DATA_READY):
+			return False
+		else:
+			return True
 
-    @property
-    def eco2(self): # pylint: disable=invalid-name
-        """Equivalent Carbon Dioxide in parts per million. Clipped to 400 to 8192ppm."""
-        self._update_data()
-        return self._eco2
 
-    @property
-    def temperature(self):
-        """Temperature based on optional thermistor in Celsius."""
-        buf = bytearray(5)
-        buf[0] = _NTC
-        with self.i2c_device as i2c:
-            i2c.write(buf, end=1, stop=False)
-            i2c.readinto(buf, start=1)
+	def readData(self):
 
-        vref = (buf[1] << 8) | buf[2]
-        vntc = (buf[3] << 8) | buf[4]
+		if(not self.available()):
+			return False
+		else:
+			buf = self._device.readList(CCS811_ALG_RESULT_DATA, 8)
 
-        # From ams ccs811 app note 000925
-        # https://download.ams.com/content/download/9059/13027/version/1/file/CCS811_Doc_cAppNote-Connecting-NTC-Thermistor_AN000372_v1..pdf
-        rntc = float(vntc) * _REF_RESISTOR / float(vref)
+			self._eCO2 = (buf[0] << 8) | (buf[1])
+			self._TVOC = (buf[2] << 8) | (buf[3])
+			
+			if(self._status.ERROR):
+				return buf[5]
+				
+			else:
+				return 0
+		
 
-        ntc_temp = math.log(rntc / 10000.0)
-        ntc_temp /= 3380.0
-        ntc_temp += 1.0 / (25 + 273.15)
-        ntc_temp = 1.0 / ntc_temp
-        ntc_temp -= 273.15
-        return ntc_temp - self.temp_offset
 
-    def set_environmental_data(self, humidity, temperature):
-        """Set the temperature and humidity used when computing eCO2 and TVOC values.
+	def setEnvironmentalData(self, humidity, temperature):
 
-        :param int humidity: The current relative humidity in percent.
-        :param float temperature: The current temperature in Celsius."""
-        # Humidity is stored as an unsigned 16 bits in 1/512%RH. The default
-        # value is 50% = 0x64, 0x00. As an example 48.5% humidity would be 0x61,
-        # 0x00.
-        hum_perc = int(humidity) << 1
+		''' Humidity is stored as an unsigned 16 bits in 1/512%RH. The
+		default value is 50% = 0x64, 0x00. As an example 48.5%
+		humidity would be 0x61, 0x00.'''
+		
+		''' Temperature is stored as an unsigned 16 bits integer in 1/512
+		degrees there is an offset: 0 maps to -25C. The default value is
+		25C = 0x64, 0x00. As an example 23.5% temperature would be
+		0x61, 0x00.
+		The internal algorithm uses these values (or default values if
+		not set by the application) to compensate for changes in
+		relative humidity and ambient temperature.'''
+		
+		hum_perc = humidity << 1
+		
+		parts = math.fmod(temperature)
+		fractional = parts[0]
+		temperature = parts[1]
 
-        # Temperature is stored as an unsigned 16 bits integer in 1/512 degrees
-        # there is an offset: 0 maps to -25C. The default value is 25C = 0x64,
-        # 0x00. As an example 23.5% temperature would be 0x61, 0x00.
-        parts = math.fmod(temperature)
-        fractional = parts[0]
-        temperature = parts[1]
+		temp_high = ((temperature + 25) << 9)
+		temp_low = ((fractional / 0.001953125) & 0x1FF)
+		
+		temp_conv = (temp_high | temp_low)
 
-        temp_high = ((temperature + 25) << 9)
-        temp_low = ((fractional / 0.001953125) & 0x1FF)
+		buf = [hum_perc, 0x00,((temp_conv >> 8) & 0xFF), (temp_conv & 0xFF)]
+		
+		self._device.writeList(CCS811_ENV_DATA, buf)
 
-        temp_conv = (temp_high | temp_low)
 
-        buf = bytearray([_ENV_DATA, hum_perc, 0x00, ((temp_conv >> 8) & 0xFF), (temp_conv & 0xFF)])
 
-        with self.i2c_device as i2c:
-            i2c.write(buf)
+	#calculate temperature based on the NTC register
+	def calculateTemperature(self):
 
-    def set_interrupt_thresholds(self, low_med, med_high, hysteresis):
-        """Set the thresholds used for triggering the interrupt based on eCO2.
-        The interrupt is triggered when the value crossed a boundary value by the
-        minimum hysteresis value.
+		buf = self._device.readList(CCS811_NTC, 4)
 
-        :param int low_med: Boundary between low and medium ranges
-        :param int med_high: Boundary between medium and high ranges
-        :param int hysteresis: Minimum difference between reads"""
-        buf = bytearray([_THRESHOLDS,
-                         ((low_med >> 8) & 0xF),
-                         (low_med & 0xF),
-                         ((med_high >> 8) & 0xF),
-                         (med_high & 0xF),
-                         hysteresis])
-        with self.i2c_device as i2c:
-            i2c.write(buf)
+		vref = (buf[0] << 8) | buf[1]
+		vrntc = (buf[2] << 8) | buf[3]
+		rntc = (float(vrntc) * float(CCS811_REF_RESISTOR) / float(vref) )
 
-    def reset(self):
-        """Initiate a software reset."""
-        #reset sequence from the datasheet
-        seq = bytearray([_SW_RESET, 0x11, 0xE5, 0x72, 0x8A])
-        with self.i2c_device as i2c:
-            i2c.write(seq)
+		ntc_temp = math.log(rntc / 10000.0)
+		ntc_temp /= 3380.0
+		ntc_temp += 1.0 / (25 + 273.15)
+		ntc_temp = 1.0 / ntc_temp
+		ntc_temp -= 273.15
+		return ntc_temp - self.tempOffset
+
+
+	def setThresholds(self, low_med, med_high, hysteresis):
+
+		buf = [((low_med >> 8) & 0xF), (low_med & 0xF), ((med_high >> 8) & 0xF), (med_high & 0xF), hysteresis ]
+		
+		self._device.writeList(CCS811_THRESHOLDS, buf)
+
+
+	def SWReset(self):
+
+		#reset sequence from the datasheet
+		seq = [0x11, 0xE5, 0x72, 0x8A]
+		self._device.writeList(CCS811_SW_RESET, seq)
+
+
+	def checkError(self):
+
+		self._status.set(self._device.readU8(CCS811_STATUS))
+		return self._status.ERROR
+
+	def getTVOC(self):
+		return self._TVOC
+
+	def geteCO2(self):
+		return self._eCO2
