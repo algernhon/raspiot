@@ -33,8 +33,6 @@ sBME680.select_gas_heater_profile(0)
 print("Launching main loop")
 try:
     while True:
-        print("Loop")
-        
         # BME680 loop
         try:
             if sBME680.get_sensor_data():
