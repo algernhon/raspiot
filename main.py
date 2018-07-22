@@ -26,6 +26,7 @@ print("Launching main loop")
 try:
     while True:
         print("Loop")
+
         # BME680 loop
         try:
             if sBME680.get_sBME680_data():
@@ -37,16 +38,6 @@ try:
                 else:
                     print(output)
         
-        except:
-            pass
-
-        # CSS811 loop
-        try:
-	        if ccs.available():
-	            temp = ccs.calculateTemperature()
-	            if not ccs.readData():
-	                print "CO2: ", ccs.geteCO2(), "ppm, TVOC: ", ccs.getTVOC(), " temp: ", temp
-
         except:
             pass
 
