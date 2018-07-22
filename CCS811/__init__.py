@@ -3,7 +3,6 @@ import math
 
 from .constants import *
 
-from micropython import const
 from adafruit_bus_device.i2c_device import I2CDevice
 from adafruit_register import i2c_bit
 from adafruit_register import i2c_bits
