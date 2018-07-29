@@ -6,12 +6,12 @@ import time
 # Import sensors
 import BME680
 import CCS811
-import TLS2561
+import TSL2561
 
 # Instance sensors
 sBME680 = BME680.BME680(0x77, -2)
 sCCS811 = CCS811.CCS811()
-sTLS2561 = TLS2561.TLS2561()
+sTSL2561 = TSL2561.TSL2561()
 
 #BME680 config 
 sBME680.set_gas_heater_temperature(320)
