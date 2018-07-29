@@ -42,7 +42,7 @@ try:
         except:
             pass
 
-        print sTLS2561.lux(), "Lux"
+        print sTSL2561.lux(), "Lux"
 
         # Wait 
         time.sleep(3)
