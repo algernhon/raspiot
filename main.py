@@ -6,12 +6,14 @@ import time
 # Import sensors
 import BME680
 import CCS811
+import TLS2561
 
 # Instance sensors
 sBME680 = BME680.BME680(0x77, -2)
 sCCS811 = CCS811.CCS811()
+sTLS2561 = TLS2561.TLS2561()
 
-#IoT config 
+#BME680 config 
 sBME680.set_gas_heater_temperature(320)
 sBME680.set_gas_heater_duration(150)
 sBME680.select_gas_heater_profile(0)
@@ -39,6 +41,8 @@ try:
                     print "CO2: ", sCCS811.geteCO2(), "ppm, TVOC: ", sCCS811.getTVOC()
         except:
             pass
+
+        print sTLS2561.lux(), "Lux"
 
         # Wait 
         time.sleep(3)
