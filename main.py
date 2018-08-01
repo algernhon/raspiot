@@ -85,7 +85,7 @@ try:
             pass
 
         # Send data to Database
-        clientDB.write_points(json_body)
+        clientDB.write_points(db_message)
 
         # Wait 
         time.sleep(MAIN_LOOP_DELAY)
