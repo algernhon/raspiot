@@ -70,7 +70,7 @@ try:
         # CSS811 loop
         try:
             if sCCS811.available():
-                if not sCCS811.readData() and sCCS811.geteCO2() > 0:
+                if not sCCS811.readData() and sCCS811.geteCO2() > 0 and sCCS811.geteCO2() < 4000:
                     print "CO2: ", sCCS811.geteCO2(), "ppm, TVOC: ", sCCS811.getTVOC()
                     db_message[0]['fields']['eco2'] = sCCS811.geteCO2()
                     db_message[0]['fields']['tvoc'] = sCCS811.getTVOC()
