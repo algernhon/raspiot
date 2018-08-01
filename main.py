@@ -6,7 +6,7 @@ import sys
 from influxdb import InfluxDBClient
 
 # Arg control
-if len(sys.argv) != 6
+if len(sys.argv) != 6:
     print("Expected: python main.py <db addr> <db port> <user> <user pswd> <database>")
     sys.exit(0)
 
