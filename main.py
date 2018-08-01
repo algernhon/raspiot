@@ -2,6 +2,13 @@
 
 # Import python lib
 import time
+import sys
+from influxdb import InfluxDBClient
+
+# Arg control
+if len(sys.argv) != 6
+    print("Expected: python main.py <db addr> <db port> <user> <user pswd> <database>")
+    sys.exit(0)
 
 # Import sensors
 import BME680
@@ -10,6 +17,9 @@ import TSL2561
 
 # Main config
 MAIN_LOOP_DELAY = 5 # second
+
+# InfluxDB config
+client = InfluxDBClient('localhost', 8086, 'root', 'root', 'example')
 
 # Instance sensors
 sBME680 = BME680.BME680(0x77, -2)
