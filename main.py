@@ -7,8 +7,11 @@ from influxdb import InfluxDBClient
 
 # Arg control
 if len(sys.argv) != 6:
+    print("Error: Arguments missing.")
     print("Expected: python main.py <db addr> <db port> <user> <user pswd> <database>")
     sys.exit(0)
+
+print(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
 
 # Import sensors
 import BME680
