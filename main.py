@@ -8,10 +8,13 @@ import BME680
 import CCS811
 import TSL2561
 
+# Main config
+MAIN_LOOP_DELAY = 5 # second
+
 # Instance sensors
 sBME680 = BME680.BME680(0x77, -2)
-sCCS811 = CCS811.CCS811()
-sTSL2561 = TSL2561.TSL2561()
+sCCS811 = CCS811.CCS811(0x5A, 0x01)
+sTSL2561 = TSL2561.TSL2561(0x39)
 
 #BME680 config 
 sBME680.set_gas_heater_temperature(320)
@@ -42,10 +45,14 @@ try:
         except:
             pass
 
-        print sTSL2561.lux(), "Lux"
+        # TSL2561 loop
+        try:
+            print sTSL2561.lux(), "Lux"
+        except:
+            pass
 
         # Wait 
-        time.sleep(3)
+        time.sleep(MAIN_LOOP_DELAY)
 
 except KeyboardInterrupt:
     pass

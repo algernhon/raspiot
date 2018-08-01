@@ -5,7 +5,7 @@ import math
 from .constants import *
 
 class CCS811(object):
-	def __init__(self, mode=CCS811_DRIVE_MODE_1SEC, address=CCS811_ADDRESS, i2c=None, **kwargs):
+	def __init__(self, address=CCS811_ADDRESS, mode=CCS811_DRIVE_MODE_1SEC, i2c=None, **kwargs):
 		# Check that mode is valid.
 		if mode not in [CCS811_DRIVE_MODE_IDLE, CCS811_DRIVE_MODE_1SEC, CCS811_DRIVE_MODE_10SEC, CCS811_DRIVE_MODE_60SEC, CCS811_DRIVE_MODE_250MS]:
 			raise ValueError('Unexpected mode value {0}.  Set mode to one of CCS811_DRIVE_MODE_IDLE, CCS811_DRIVE_MODE_1SEC, CCS811_DRIVE_MODE_10SEC, CCS811_DRIVE_MODE_60SEC or CCS811_DRIVE_MODE_250MS'.format(mode))

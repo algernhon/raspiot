@@ -1,10 +1,3 @@
-'''TSL2561 constants'''
-
-__author__ = 'Georges Toth <georges@trypill.org>'
-__credits__ = ['K.Townsend = Adafruit Industries']
-__license__ = 'BSD'
-
-
 TSL2561_DELAY_INTTIME_13MS = 15
 TSL2561_DELAY_INTTIME_101MS = 120
 TSL2561_DELAY_INTTIME_402MS = 450
