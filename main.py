@@ -17,16 +17,19 @@ import BME680
 import CCS811
 import TSL2561
 
-# Main config
-MAIN_LOOP_DELAY = 5 # second
+# Main config - You can change this!
+DEVICE_ID = "001"                   # this ID should be unique
+DEVICE_LOCATION = "living room"     # room location of the device
+MAIN_LOOP_DELAY = 5                 # loop delay in second
 
 # InfluxDB config
 clientDB = InfluxDBClient(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
+DB_MEASUREMENT = "home"
 
 # Instance sensors
-sBME680 = BME680.BME680(0x77, -2)
-sCCS811 = CCS811.CCS811(0x5A, 0x01)
-sTSL2561 = TSL2561.TSL2561(0x39)
+sBME680 = BME680.BME680(0x77, -2.5)         # I2C address and temperature offeset
+sCCS811 = CCS811.CCS811(0x5A, 0x01)         # I2C address and drive mode
+sTSL2561 = TSL2561.TSL2561(0x39)            # I2C address
 
 #BME680 config 
 sBME680.set_gas_heater_temperature(320)
@@ -40,10 +43,10 @@ try:
         current_time = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
         db_message = [
             {
-                "measurement": "home",
+                "measurement": DB_MEASUREMENT,
                 "tags": {
-                    "device": "001",
-                    "location": "living room"
+                    "device": DEVICE_ID,
+                    "location": DEVICE_LOCATION
                 },
                 "time": current_time,
                 "fields": {}
@@ -66,7 +69,7 @@ try:
         # CSS811 loop
         try:
             if sCCS811.available():
-                if not sCCS811.readData() and sCCS811.geteCO2() > 0 and sCCS811.geteCO2() < 4000:
+                if not sCCS811.readData() and sCCS811.geteCO2() > 0 and sCCS811.geteCO2() < 8192:
                     db_message[0]['fields']['eco2'] = sCCS811.geteCO2()
                     db_message[0]['fields']['tvoc'] = sCCS811.getTVOC()
         except:
