@@ -53,17 +53,13 @@ try:
         # BME680 loop
         try:
             if sBME680.get_sensor_data():
-                output = "{0:.2f}C, {1:.2f}hPa, {2:.2f}%RH".format(sBME680.data.temperature, sBME680.data.pressure, sBME680.data.humidity)
                 db_message[0]['fields']['temperature'] = sBME680.data.temperature
                 db_message[0]['fields']['pressure'] = sBME680.data.pressure
                 db_message[0]['fields']['humidity'] = sBME680.data.humidity
 
                 if sBME680.data.heat_stable:
-                    print("{0}, {1}Ohms".format(output, sBME680.data.gas_resistance))
                     db_message[0]['fields']['air_quality'] = sBME680.data.gas_resistance
 
-                else:
-                    print(output)
         except:
             pass
 
@@ -71,7 +67,6 @@ try:
         try:
             if sCCS811.available():
                 if not sCCS811.readData() and sCCS811.geteCO2() > 0 and sCCS811.geteCO2() < 4000:
-                    print "CO2: ", sCCS811.geteCO2(), "ppm, TVOC: ", sCCS811.getTVOC()
                     db_message[0]['fields']['eco2'] = sCCS811.geteCO2()
                     db_message[0]['fields']['tvoc'] = sCCS811.getTVOC()
         except:
@@ -79,13 +74,15 @@ try:
 
         # TSL2561 loop
         try:
-            print sTSL2561.lux(), "Lux"
             db_message[0]['fields']['lux'] = sTSL2561.lux()
         except:
             pass
 
-        # Send data to Database
-        clientDB.write_points(db_message)
+        # Send all data to Database
+        try:
+            clientDB.write_points(db_message)
+        except:
+            print("Error connection to database")
 
         # Wait 
         time.sleep(MAIN_LOOP_DELAY)
