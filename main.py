@@ -36,6 +36,8 @@ sBME680.set_gas_heater_temperature(320)
 sBME680.set_gas_heater_duration(150)
 sBME680.select_gas_heater_profile(0)
 
+print("Collecting and sending data...")
+
 # Main loop
 try:
     while True:
