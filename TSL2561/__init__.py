@@ -16,8 +16,7 @@ class TSL2561(object):
         else:
             self.address = TSL2561_ADDR_FLOAT
 
-        self.busnum = 1
-        self.i2c = I2C.get_i2c_device(self.address, busnum=busnum)
+        self.i2c = I2C.get_i2c_device(self.address, 1)
 
         self.debug = debug
         self.integration_time = integration_time
