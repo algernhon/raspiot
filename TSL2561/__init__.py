@@ -15,9 +15,8 @@ class TSL2561(object):
             self.address = address
         else:
             self.address = TSL2561_ADDR_FLOAT
-        if busnum is None:
-            self.busnum = 1
 
+        self.busnum = 1
         self.i2c = I2C.get_i2c_device(self.address, busnum=busnum)
 
         self.debug = debug
