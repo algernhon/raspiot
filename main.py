@@ -22,7 +22,7 @@ clientDB = InfluxDBClient(config.database['host'], config.database['port'], conf
 
 # Instance sensors
 sBME680 = BME680.BME680(config.BME680['i2c-address'], config.BME680['temperature-offset'], config.BME680['humidity-offset'])
-sCCS811 = CCS811.CCS811(config.CCS811['i2c-address'], config.CCS811['drive-mode')
+sCCS811 = CCS811.CCS811(config.CCS811['i2c-address'], config.CCS811['drive-mode'])
 sTSL2561 = TSL2561.TSL2561(config.TSL2561['i2c-address'], config.TSL2561['integration-time'], config.TSL2561['gain'])
 
 #BME680 config 
