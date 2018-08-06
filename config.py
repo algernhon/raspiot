@@ -18,8 +18,8 @@ device = {
 # BME680 config
 BME680 = {
     'i2c-address': 0x77,
-    'temperature-offset': '',
-    'humidity-offset': '',
+    'temperature-offset': 0,
+    'humidity-offset': 0,
     'heater-temperature': 320,
     'heater-duration': 150,
     'heater-profile': 0
