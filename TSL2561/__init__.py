@@ -6,7 +6,7 @@ from .constants import *
 
 class TSL2561(object):
     '''Driver for the TSL2561 digital luminosity (light) sensors.'''
-    def __init__(self, address=None, busnum=None,
+    def __init__(self, address=None,
                  integration_time=TSL2561_INTEGRATIONTIME_402MS,
                  gain=TSL2561_GAIN_1X, autogain=False, debug=False):
 

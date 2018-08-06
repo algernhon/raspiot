@@ -2,14 +2,14 @@
 
 # Import python lib
 import time
-import sys
+import config
 from datetime import datetime
 from influxdb import InfluxDBClient
 
-# Arg control
-if len(sys.argv) != 6:
-    print("Error: Incorrect arguments")
-    print("Expected: python main.py <db addr> <db port> <user> <user pswd> <database>")
+# Config control
+if config.device['id'] == '':
+    print("Error: No device ID")
+    print("You need to give an ID to your device (#001, Alpha, JohnSnow...)")
     sys.exit(0)
 
 # Import sensors
@@ -17,29 +17,26 @@ import BME680
 import CCS811
 import TSL2561
 
-# Main config - You can change this!
-DEVICE_ID = "001"                   # this ID should be unique
-DEVICE_LOCATION = "living room"     # room location of the device
-MAIN_LOOP_DELAY = 5                 # loop delay in second
-
 # InfluxDB config
-clientDB = InfluxDBClient(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
-DB_MEASUREMENT = "home"
+clientDB = InfluxDBClient(config.database['host'], config.database['port'], config.database['user'], config.database['password'], config.database['database'])
 
 # Instance sensors
-sBME680 = BME680.BME680(0x77, -0.4, -7)         # I2C address and temperature offeset
-sCCS811 = CCS811.CCS811(0x5A, 0x01)         # I2C address and drive mode
-sTSL2561 = TSL2561.TSL2561(0x39)            # I2C address
+sBME680 = BME680.BME680(config.BME680['i2c-address'], config.BME680['temperature-offset'], config.BME680['humidity-offset'])
+sCCS811 = CCS811.CCS811(config.CCS811['i2c-address'], config.CCS811['drive-mode')
+sTSL2561 = TSL2561.TSL2561(config.TSL2561['i2c-address'], config.TSL2561['integration-time'], config.TSL2561['gain'])
 
 #BME680 config 
-sBME680.set_gas_heater_temperature(320)
-sBME680.set_gas_heater_duration(150)
-sBME680.select_gas_heater_profile(0)
+sBME680.set_gas_heater_temperature(config.BME680['heater-temperature'])
+sBME680.set_gas_heater_duration(config.BME680['heater-duration'])
+sBME680.select_gas_heater_profile(config.BME680['heater-profile'])
 
-print("-------------")
-print("RaspIOT #", DEVICE_ID)
-print("-------------")
-print("Collecting and sending data...", DEVICE_ID)
+print("----------------")
+print("Launching RaspIOT...")
+print("Device: ", config.device['id'])
+print("Location: ", config.device['location'])
+print("----------------")
+print("")
+print("Waiting for data...")
 
 # Main loop
 try:
@@ -48,10 +45,10 @@ try:
         current_time = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
         db_message = [
             {
-                "measurement": DB_MEASUREMENT,
+                "measurement": config.database['measurement'],
                 "tags": {
-                    "device": DEVICE_ID,
-                    "location": DEVICE_LOCATION
+                    "device": config.device['id'],
+                    "location": config.device['location']
                 },
                 "time": current_time,
                 "fields": {}
@@ -89,11 +86,12 @@ try:
         # Send all data to Database
         try:
             clientDB.write_points(db_message)
+            print(db_message) # Feel free to remove this line
         except:
             print("Error connection to database")
 
         # Wait 
-        time.sleep(MAIN_LOOP_DELAY)
+        time.sleep(config.device['loop-delay'])
 
 except KeyboardInterrupt:
     pass
