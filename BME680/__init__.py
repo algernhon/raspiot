@@ -3,7 +3,7 @@ import math
 import time
 
 class BME680(BME680Data):
-    def __init__(self, i2c_addr=I2C_ADDR_PRIMARY, temp_offset=0):
+    def __init__(self, i2c_addr=I2C_ADDR_PRIMARY, temp_offset=0, hum_offset=0):
         BME680Data.__init__(self)
 
         self.i2c_addr = i2c_addr
@@ -21,12 +21,13 @@ class BME680(BME680Data):
 
         self._get_calibration_data()
 
-        self.set_humidity_oversample(OS_2X)
+        self.set_humidity_oversample(OS_4X)
         self.set_pressure_oversample(OS_4X)
         self.set_temperature_oversample(OS_8X)
         self.set_filter(FILTER_SIZE_3)
         self.set_gas_status(ENABLE_GAS_MEAS)
         self.set_temp_offset(temp_offset)
+        self.set_hum_offset(hum_offset)
         self.get_sensor_data()
 
     def _get_calibration_data(self):
@@ -55,6 +56,16 @@ class BME680(BME680Data):
             self.offset_temp_in_t_fine = 0
         else:
             self.offset_temp_in_t_fine = int(math.copysign((((int(abs(value) * 100)) << 8) - 128) / 5, value))
+
+    def set_hum_offset(self, value):
+        """Set humidity offset in %
+        If set, the humidty t_fine will be increased by given value in celsius.
+        :param value: Humidty offset in %, eg. 4, -8, 1.25
+        """
+        if value == 0:
+            self.offset_hum_in_t_fine = 0
+        else:
+            self.offset_hum_in_t_fine = int(math.copysign(((int(abs(value) << 10)) / 1000) << 12, value))
 
     def set_humidity_oversample(self, value):
         """Set humidity oversampling
@@ -327,7 +338,7 @@ class BME680(BME680Data):
         var4 = ((var4) + ((temp_scaled * self.calibration_data.par_h7) // (100))) >> 4
         var5 = ((var3 >> 14) * (var3 >> 14)) >> 10
         var6 = (var4 * var5) >> 1
-        calc_hum = (((var3 + var6) >> 10) * (1000)) >> 12
+        calc_hum = (((var3 + var6 + self.offset_hum_in_t_fine) >> 10) * (1000)) >> 12
 
         return min(max(calc_hum,0),100000)
 
