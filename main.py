@@ -27,7 +27,7 @@ clientDB = InfluxDBClient(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sy
 DB_MEASUREMENT = "home"
 
 # Instance sensors
-sBME680 = BME680.BME680(0x77, -0.4, -700)         # I2C address and temperature offeset
+sBME680 = BME680.BME680(0x77, -0.4, -7000)         # I2C address and temperature offeset
 sCCS811 = CCS811.CCS811(0x5A, 0x01)         # I2C address and drive mode
 sTSL2561 = TSL2561.TSL2561(0x39)            # I2C address
 
