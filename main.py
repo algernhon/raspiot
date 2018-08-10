@@ -39,7 +39,7 @@ print("----------------")
 print("")
 print("Waiting for data...")
 
-count = 0
+count = 1
 
 # Main loop
 try:
