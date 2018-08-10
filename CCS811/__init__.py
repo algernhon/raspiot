@@ -112,8 +112,8 @@ class CCS811(object):
 		fractional = parts[0]
 		temperature = parts[1]
 
-		temp_high = ((temperature + 25) << 9)
-		temp_low = ((fractional / 0.001953125) & 0x1FF)
+		temp_high = (int(temperature + 25) << 9)
+		temp_low = (int(fractional / 0.001953125) & 0x1FF)
 		
 		temp_conv = (temp_high | temp_low)
 
