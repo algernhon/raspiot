@@ -106,9 +106,9 @@ class CCS811(object):
 		not set by the application) to compensate for changes in
 		relative humidity and ambient temperature.'''
 		
-		hum_perc = humidity << 1
+		hum_perc = int(humidity) << 1
 		
-		parts = math.fmod(temperature)
+		parts = math.modf(temperature)
 		fractional = parts[0]
 		temperature = parts[1]
 
