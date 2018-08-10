@@ -75,9 +75,8 @@ try:
         if sCCS811.available():
              # Set temperature and humidity from BME680 in order to compensate changes in CCS811 algo.
             if count == 0 and type(db_message[0]['fields']['temperature']) is float and type(db_message[0]['fields']['humidity']) is float:
-                roundedHumidity = round(db_message[0]['fields']['humidity'] * 2) / 2
-                roundedTemperature = round(db_message[0]['fields']['temperature'] * 2) / 2
-                sCCS811.setEnvironmentalData(hex(roundedHumidity*2), hex(roundedTemperature*2+50))
+                roundedHumidity = round(db_message[0]['fields']['humidity'])
+                sCCS811.setEnvironmentalData(roundedHumidity, db_message[0]['fields']['temperature'])
         try:
             if sCCS811.available():
                 # Set temperature and humidity from BME680 in order to compensate changes in CCS811 algo.
