@@ -73,7 +73,7 @@ try:
         try:
             if sCCS811.available():
                 # Set temperature and humidity from BME680 in order to compensate changes in CCS811 algo.
-                if type(db_message[0]['fields']['temperature']) is int and type(db_message[0]['fields']['humidity'])
+                if type(db_message[0]['fields']['temperature']) is int and type(db_message[0]['fields']['humidity']):
                     sCCS811.setEnvironmentalData(db_message[0]['fields']['humidity'], db_message[0]['fields']['temperature'])
                     print("Set env data OK")
                     
