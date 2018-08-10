@@ -72,19 +72,22 @@ try:
             pass
 
         # CSS811 loop
+        if sCCS811.available():
+             # Set temperature and humidity from BME680 in order to compensate changes in CCS811 algo.
+            if count == 0 and type(db_message[0]['fields']['temperature']) is float and type(db_message[0]['fields']['humidity']) is float:
+                sCCS811.setEnvironmentalData(db_message[0]['fields']['humidity'], db_message[0]['fields']['temperature'])
         try:
             if sCCS811.available():
                 # Set temperature and humidity from BME680 in order to compensate changes in CCS811 algo.
                 if count == 0 and type(db_message[0]['fields']['temperature']) is float and type(db_message[0]['fields']['humidity']) is float:
                     print("(!) CSS811 environmental data updated")
                     sCCS811.setEnvironmentalData(db_message[0]['fields']['humidity'], db_message[0]['fields']['temperature'])
-                    time.sleep(0.1)
   
                 if not sCCS811.readData() and sCCS811.geteCO2() > 0 and sCCS811.geteCO2() < 8192:
                     db_message[0]['fields']['eco2'] = sCCS811.geteCO2()
                     db_message[0]['fields']['tvoc'] = sCCS811.getTVOC()
         except:
-            pass
+            print("Error CSS")
 
         # TSL2561 loop
         try:
