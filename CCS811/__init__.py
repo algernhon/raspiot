@@ -105,20 +105,12 @@ class CCS811(object):
 		The internal algorithm uses these values (or default values if
 		not set by the application) to compensate for changes in
 		relative humidity and ambient temperature.'''
-		
-		hum_perc = int(humidity) << 1
-		
-		parts = math.modf(temperature)
-		fractional = parts[0]
-		temperature = parts[1]
 
-		temp_high = (int(temperature + 25) << 9)
-		temp_low = (int(fractional / 0.001953125) & 0x1FF)
-		
-		temp_conv = (temp_high | temp_low)
+		hum_perc = (int)(humidity *1024/2)
+		temp_conv = (int)((temperature +25)*1024/2)
 
-		buf = [hum_perc, 0x00,((temp_conv >> 8) & 0xFF), (temp_conv & 0xFF)]
-		
+		buf = [((hum_perc >> 8) & 0xFF), (hum_perc & 0xFF),((temp_conv >> 8) & 0xFF), (temp_conv & 0xFF)]
+
 		self._device.writeList(CCS811_ENV_DATA, buf)
 
 
