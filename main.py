@@ -18,6 +18,13 @@ import BME680
 import CCS811
 import TSL2561
 
+# Import GPIO lib if FAN is enabled
+if config.fan['enabled'] == True:
+    import RPi.GPIO as GPIO
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(config.fan['pin'], GPIO.OUT)
+    GPIO.setwarnings(False)
+
 # InfluxDB config
 clientDB = InfluxDBClient(config.database['host'], config.database['port'], config.database['user'], config.database['password'], config.database['database'])
 
@@ -69,7 +76,7 @@ try:
                     db_message[0]['fields']['air_quality'] = sBME680.data.gas_resistance
 
         except:
-            pass
+            print("Error BME680: Can't read data")
 
         # CSS811 loop
         try:
@@ -82,14 +89,21 @@ try:
                 if not sCCS811.readData() and sCCS811.geteCO2() > 0 and sCCS811.geteCO2() < 8192:
                     db_message[0]['fields']['eco2'] = sCCS811.geteCO2()
                     db_message[0]['fields']['tvoc'] = sCCS811.getTVOC()
+
+                    if config.fan['enabled'] == True and db_message[0]['fields']['eco2'] > 800 and GPIO.input(config.fan['pin']) != True:
+                        setFan(True)
+
+                    if config.fan['enabled'] == True and db_message[0]['fields']['eco2'] <= 800 and GPIO.input(config.fan['pin']) != False:
+                        setFan(False)
+
         except:
-            pass
+            print("Error CCS811: Can't read data")
 
         # TSL2561 loop
         try:
             db_message[0]['fields']['lux'] = sTSL2561.lux()
         except:
-            pass
+            print("Error TSL2561: Can't read data")
 
         # Send all data to Database
         try:
@@ -104,3 +118,6 @@ try:
 
 except KeyboardInterrupt:
     pass
+
+def setFan(mode):
+    GPIO.output(config.fan['pin'], mode)

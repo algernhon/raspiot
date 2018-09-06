@@ -37,3 +37,9 @@ TSL2561 = {
     'integration-time': 0x02,
     'gain': 0x00
 }
+
+# FAN config - Disabled by default
+fan = {
+    'enabled': False,
+    'pin': 5
+}
