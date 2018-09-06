@@ -48,6 +48,9 @@ print("Waiting for data...")
 
 count = 0
 
+def setFan(mode):
+    GPIO.output(config.fan['pin'], mode)
+
 # Main loop
 try:
     while True:
@@ -92,9 +95,11 @@ try:
 
                     if config.fan['enabled'] == True and db_message[0]['fields']['eco2'] > 800 and GPIO.input(config.fan['pin']) != True:
                         setFan(True)
+                        print("Fan ON")
 
                     if config.fan['enabled'] == True and db_message[0]['fields']['eco2'] <= 800 and GPIO.input(config.fan['pin']) != False:
                         setFan(False)
+                        print("Fan OFF")
 
         except:
             print("Error CCS811: Can't read data")
@@ -118,6 +123,3 @@ try:
 
 except KeyboardInterrupt:
     pass
-
-def setFan(mode):
-    GPIO.output(config.fan['pin'], mode)
