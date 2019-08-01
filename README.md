@@ -12,7 +12,7 @@ pip install influxdb Adafruit-bitfield Adafruit-GPIO smbus
 We have to change the i2c baudrate for the CCS811 sensor, otherwise it won't work:
 ```
 sudo nano /boot/config.txt
-Add this lane: dtparam=i2c_baudrate=10000
+Add this line: dtparam=i2c_baudrate=10000
 ```
 
 Once everything is done, clone this repo:
@@ -52,4 +52,9 @@ nano config.py
 Launch the app for the first time with the update script (your config file is going to be copied to the raspiot app): 
 ```
 ./update.sh
+```
+
+If you have already launched this app at least once, execute the start script:
+```
+./start.sh
 ```
