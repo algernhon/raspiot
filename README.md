@@ -28,9 +28,11 @@ wget https://raw.githubusercontent.com/algernhon/raspiot-launcher/master/update.
 wget https://raw.githubusercontent.com/algernhon/raspiot-launcher/master/config.py
 ```
 
-Start.sh: Start the application in a screen window
-Update: Stop, download the latest version and relaunch the app
-Config: This is the config file you need to change if you use those 3 files. This one will be copied into your Raspio folder every time you update the app.
+`Start.sh`: Start the application in a screen window
+
+`Update.sh`: Stop, download the latest version and relaunch the app
+
+`Config.py`: This is the config file you need to change if you use those 3 files. This one will be copied into your Raspio folder every time you update the app.
 
 Give them the permission to be executed:
 ```
