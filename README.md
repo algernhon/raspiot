@@ -21,7 +21,7 @@ git clone https://github.com/algernhon/raspiot.git
 ```
 
 # Config 
-**1 -** In order to run this app smoothly, download this 3 files (opt):
+**1 -** In order to run this app smoothly, download this 3 files (**opt**):
 ```
 wget https://raw.githubusercontent.com/algernhon/raspiot-launcher/master/start.sh
 wget https://raw.githubusercontent.com/algernhon/raspiot-launcher/master/update.sh
@@ -39,7 +39,7 @@ Give them the permission to be executed:
 chmod +x start.sh update.sh
 ```
 
-**2 -** Add the startup script to crontab:
+**2 -** Add the startup script to crontab (**opt**):
 ```
 crontab -e
 ```
