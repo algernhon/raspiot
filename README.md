@@ -1,5 +1,5 @@
 # raspiot
-A python code for making to make an IoT device from a Raspberry
+A python code to create an IoT device from a Raspberry
 
 # Install
 **1 -** Install needed dependencies:
